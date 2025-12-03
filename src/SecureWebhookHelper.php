@@ -70,6 +70,60 @@ class SecureWebhookHelper
     }
 
     /**
+     * Encrypt webhook data using AES-256-CBC
+     * 
+     * This method encrypts the provided data array using AES-256-CBC encryption.
+     * The IV (initialization vector) is prepended to the encrypted data.
+     * 
+     * @param array $webhookData The data to encrypt
+     * @return string Base64-encoded encrypted data with IV prefix
+     * @throws Exception If encryption fails
+     */
+    public function encryptWebhookData(array $webhookData)
+    {
+        // Generate random IV (16 bytes for AES-256-CBC)
+        $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-256-cbc'));
+        
+        // Encrypt the data
+        $encryptedData = openssl_encrypt(
+            json_encode($webhookData),
+            'aes-256-cbc',
+            $this->encryptionKey,
+            OPENSSL_RAW_DATA,
+            $iv
+        );
+        
+        if ($encryptedData === false) {
+            throw new Exception('Encryption failed');
+        }
+        
+        // Return the IV and encrypted data as a base64 encoded string
+        return base64_encode($iv . $encryptedData);
+    }
+
+    /**
+     * Create HMAC signature for webhook data
+     * 
+     * This method generates a HMAC (Hash-based Message Authentication Code) 
+     * using the SHA-256 algorithm for the provided webhook data.
+     * 
+     * @param string $guid The webhook GUID
+     * @param string $webhookType The webhook type
+     * @param array $webhookData The webhook data
+     * @return string The HMAC signature (hex string)
+     */
+    public function createHmac($guid, $webhookType, array $webhookData)
+    {
+        $data = array(
+            'guid' => $guid,
+            'webhookType' => $webhookType,
+            'webhookData' => $webhookData
+        );
+        $dataString = json_encode($data);
+        return hash_hmac('sha256', $dataString, $this->hmacKey);
+    }
+
+    /**
      * Try to decrypt and verify webhook payload with IV prefix
      * 
      * This method decrypts the payload (which has IV prepended) and verifies
