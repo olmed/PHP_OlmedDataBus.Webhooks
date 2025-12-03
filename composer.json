@@ -1,0 +1,24 @@
+{
+    "name": "olmed/databus-webhook-helpers",
+    "description": "Secure webhook helper library for encrypting, decrypting and verifying webhook payloads",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["webhook", "encryption", "hmac", "security", "databus"],
+    "authors": [
+        {
+            "name": "Olmed",
+            "email": "contact@olmed.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0",
+        "ext-openssl": "*",
+        "ext-json": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Olmed\\DataBus\\Webhooks\\": "src/"
+        }
+    },
+    "minimum-stability": "stable"
+}
